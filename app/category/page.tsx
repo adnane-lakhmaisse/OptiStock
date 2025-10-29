@@ -8,6 +8,7 @@ import { createCategory, getAllCategories, updateCategory } from '../actions';
 import { toast } from 'react-toastify';
 import { Category } from '@prisma/client';
 import EmptyState from '../components/EmptyState';
+import { Edit, Pencil, PenLine, PinIcon } from 'lucide-react';
 
 export default function Page() {
   const { user } = useUser();
@@ -27,6 +28,15 @@ export default function Page() {
     (document.getElementById('category-modal') as HTMLDialogElement)?.showModal();
   }
 
+  const openEditModal = (category: Category) => {
+    setName(category.name);
+    setDescription(category.description || "");
+    setLoading(false);
+    setEditMode(true);
+    setEditingCategoryId(category.id);
+    (document.getElementById('category-modal') as HTMLDialogElement)?.showModal();
+  }
+
   const closeModal = () => {
     setName("");
     setDescription("");
@@ -40,6 +50,7 @@ export default function Page() {
     if (email) {
       await createCategory(name, email, description);
     }
+    await loadCategories();
     closeModal();
     setLoading(false);
     toast.success("Category created successfully");
@@ -51,6 +62,7 @@ export default function Page() {
     if (email) {
       await updateCategory(categoryId, email, name, description);
     }
+    await loadCategories();
     closeModal();
     setLoading(false);
     setEditingCategoryId(null);
@@ -92,6 +104,14 @@ export default function Page() {
                   <h2 className='font-bold text-lg'>{category.name}</h2>
                   <p className='text-sm text-gray-600 mt-2'>{category.description}</p>
                 </div>
+                <div>
+                  <button
+                    className='btn btn-ghost btn-sm'
+                    onClick={() => openEditModal(category)}
+                  >
+                    <PenLine className='w-4 h-4 text-primary' />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -104,7 +124,7 @@ export default function Page() {
         onChangeName={setName}
         onChangeDescription={setDescription}
         onClose={closeModal}
-        onSubmit={handleCreateCategory}
+        onSubmit={editMode ? () => handleUpdateCategory(editingCategoryId!) : handleCreateCategory}
         editMode={editMode} />
     </Wrapper>
   )
