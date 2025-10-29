@@ -4,11 +4,11 @@ import React, { useEffect, useState } from 'react'
 import Wrapper from '../components/Wrapper'
 import CategoryModal from '../components/CategoryModal'
 import { useUser } from '@clerk/nextjs';
-import { createCategory, getAllCategories, updateCategory } from '../actions';
+import { createCategory, deleteCategory, getAllCategories, updateCategory } from '../actions';
 import { toast } from 'react-toastify';
 import { Category } from '@prisma/client';
 import EmptyState from '../components/EmptyState';
-import { Edit, Pencil, PenLine, PinIcon } from 'lucide-react';
+import { PenLine, Trash2 } from 'lucide-react';
 
 export default function Page() {
   const { user } = useUser();
@@ -69,6 +69,19 @@ export default function Page() {
     toast.success("Category updated successfully");
   }
 
+  const handleDeleteCategory = async (categoryId: string) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this category? All items under this category will also be deleted.");
+    if (!confirmDelete) return;   
+
+    setLoading(true);
+    if (email) {
+      await deleteCategory(categoryId, email);
+    }
+    await loadCategories();
+    setLoading(false);
+    toast.success("Category deleted successfully");
+  }
+
   const loadCategories = async () => {
     if (email) {
       const data = await getAllCategories(email);
@@ -111,6 +124,13 @@ export default function Page() {
                   >
                     <PenLine className='w-4 h-4 text-primary' />
                   </button>
+                  <button
+                    className='btn btn-ghost btn-sm'
+                    onClick={() => handleDeleteCategory(category.id)}
+                  >
+                    <Trash2 className='w-4 h-4 text-error' />
+                  </button>
+
                 </div>
               </div>
             ))}
