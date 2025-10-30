@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 import { Category } from '@prisma/client';
 import EmptyState from '../components/EmptyState';
 import { PenLine, Trash2 } from 'lucide-react';
+import { confirmDialog } from '../components/ConfirmWindow';
 
 export default function Page() {
   const { user } = useUser();
@@ -70,7 +71,12 @@ export default function Page() {
   }
 
   const handleDeleteCategory = async (categoryId: string) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this category? All items under this category will also be deleted.");
+    const confirmDelete = await confirmDialog({
+    title: "Are you sure you want to delete this category?",
+    text: "All items under this category will also be deleted.",
+    confirmText: "Yes, delete it!",
+    cancelText: "Cancel",
+  });
     if (!confirmDelete) return;   
 
     setLoading(true);
