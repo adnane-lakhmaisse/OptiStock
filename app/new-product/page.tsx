@@ -42,7 +42,7 @@ export default function Page() {
   }
 
   const handleSubmit = async () => {
-    if(!file){
+    if (!file) {
       toast.error("Please select an image file.");
       return;
     }
@@ -53,17 +53,18 @@ export default function Page() {
         method: 'POST',
         body: imageData,
       });
-      const data = await response.json(); 
+      const data = await response.json();
 
       if (data.success) {
-        setFormData((prevData) => ({
-          ...prevData,
+        const updatedFormData = {
+          ...formData,
           imageUrl: data.imageUrl,
-        })); 
+        };
+        setFormData(updatedFormData);
 
-        await createProduct(formData, email);
-        toast.success("Image uploaded successfully.");
+        await createProduct(updatedFormData, email );
         router.push('/products');
+        toast.success("Product created successfully!");
 
       } else {
         toast.error("Image upload failed: " + data.message);
@@ -147,7 +148,7 @@ export default function Page() {
                 className='file-input file-input-bordered w-full'
                 onChange={(e) => handleFileChange(e)}
               />
-              <button className='btn btn-primary text-white ' onClick={() => {handleSubmit()}}>
+              <button className='btn btn-primary text-white ' onClick={() => { handleSubmit() }}>
                 Create Product
               </button>
             </div>

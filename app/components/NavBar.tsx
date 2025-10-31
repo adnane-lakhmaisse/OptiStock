@@ -7,6 +7,7 @@ import {
   ListTree,
   Menu,
   PackagePlus,
+  PlusCircle,
   ShoppingBasket,
   X,
 } from "lucide-react";
@@ -22,7 +23,8 @@ export default function NavBar() {
 
   const navLinks = [
     { name: "Home", href: "/", icon: Home },
-    { name: "New Product", href: "/new-product", icon: ShoppingBasket },
+    { name: "New Product", href: "/new-product", icon: PlusCircle },
+    { name: "Products", href: "/products", icon: ShoppingBasket },
     { name: "Categories", href: "/category", icon: ListTree },
     { name: "About", href: "/about", icon: AlignHorizontalDistributeEndIcon },
   ];
