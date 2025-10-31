@@ -3,18 +3,59 @@ import React, { useEffect, useState } from 'react'
 import Wrapper from '../components/Wrapper'
 import { useUser } from '@clerk/nextjs';
 import { Product } from '@/type';
-import { getAllProducts } from '../actions';
+import { deleteProduct, getAllProducts } from '../actions';
 import EmptyState from '../components/EmptyState';
 import ProductImage from '../components/ProductImage';
 import Link from 'next/link';
 import { Trash2 } from 'lucide-react';
+import { confirmDialog } from '../components/ConfirmWindow';
+import { toast } from 'react-toastify';
 
 export default function Page() {
   const { user } = useUser()
   const email = user?.primaryEmailAddress?.emailAddress || "";
   const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  
+  const handleDeleteProduct = async (product: Product) => {
+    const confirmDelete = await confirmDialog({
+      title: "Are you sure you want to delete this product?",
+      text: "This action cannot be undone.",
+      confirmText: "Yes, delete it!",
+      cancelText: "Cancel",
+    });
+
+    if (!confirmDelete) return;
+
+    try {
+      if (product.imageUrl) {
+        const responseDelete = await fetch('/api/upload', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ path: product.imageUrl }),
+        });
+
+        const dataDelete = await responseDelete.json();
+
+        if (!dataDelete.success) {
+          toast.error("Failed to delete image: " + dataDelete.message);
+          return;
+        } else {
+          setLoading(true);
+          if (email) {
+            await deleteProduct(product.id, email);
+          }
+          await fetchProducts();
+          setLoading(false);
+          toast.success("Product deleted successfully");
+        }
+      }
+    } catch (error) {
+      throw new Error("Error deleting image: " + (error as Error).message);
+    }
+  }
 
   const fetchProducts = async () => {
     try {
@@ -68,7 +109,7 @@ export default function Page() {
                   <td>{product.categoryName}</td>
                   <td>
                     <Link href={`/edit-product/${product.id}`} className="btn btn-xs btn-primary mr-2 text-white w-fit">Edit</Link>
-                    <button className="btn btn-xs btn-error mr-2 text-white w-fit"><Trash2 className='w-3 h-3'/></button>
+                    <button className="btn btn-xs btn-error mr-2 text-white w-fit" onClick={() => handleDeleteProduct(product)}><Trash2 className='w-3 h-3' /></button>
                   </td>
                 </tr>
               ))}
@@ -79,4 +120,3 @@ export default function Page() {
     </Wrapper>
   )
 }
-
