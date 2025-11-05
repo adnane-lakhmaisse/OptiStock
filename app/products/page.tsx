@@ -108,7 +108,7 @@ export default function Page() {
                   <td className='capitalize'>{product.quantity} {product.unit}</td>
                   <td>{product.categoryName}</td>
                   <td>
-                    <Link href={`/edit-product/${product.id}`} className="btn btn-xs btn-primary mr-2 text-white w-fit">Edit</Link>
+                    <Link href={`/update-product/${product.id}`} className="btn btn-xs btn-primary mr-2 text-white w-fit">Edit</Link>
                     <button className="btn btn-xs btn-error mr-2 text-white w-fit" onClick={() => handleDeleteProduct(product)}><Trash2 className='w-3 h-3' /></button>
                   </td>
                 </tr>
