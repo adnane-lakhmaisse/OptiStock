@@ -174,35 +174,46 @@ export async function createProduct(formData: FormDataType, email: string) {
 
 export async function updateProduct(formData: FormDataType, email: string) {
   const { id, name, description, price, imageUrl, categoryId } = formData;
-  if (!id || !price || !email || !categoryId) {
-    throw new Error(
-      "ID, price, email and categoryId are required to update a product"
-    );
+  
+  if (!id || !email) {
+    throw new Error("ID and email are required to update a product");
   }
-  const safeImageUrl = imageUrl || "";
+
   try {
     const association = await getAssociation(email);
     if (!association) {
       throw new Error("Association not found with this email");
     }
+
+    // Build update data object
+    const updateData: any = {
+      name,
+      description: description || "",
+      price: Number(price),
+    };
+
+    // Only update imageUrl if it's provided
+    if (imageUrl) {
+      updateData.imageUrl = imageUrl;
+    }
+
+    // Only update categoryId if it's provided
+    if (categoryId) {
+      updateData.categoryId = categoryId;
+    }
+
     await prisma.product.update({
       where: {
         id: id,
         associationId: association.id,
       },
-      data: {
-        name,
-        description: description || "",
-        price: Number(price),
-        imageUrl: safeImageUrl,
-      },
+      data: updateData,
     });
   } catch (error) {
     console.error(error);
     throw new Error("Failed to update product");
   }
 }
-
 export async function deleteProduct(id: string, email: string) {
   if (!id || !email) {
     throw new Error("ID and email are required to delete a product");

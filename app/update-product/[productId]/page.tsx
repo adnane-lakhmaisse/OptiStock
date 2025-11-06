@@ -24,7 +24,7 @@ export default function Page({ params }: { params: Promise<{ productId: string }
         price: 0,
         imageUrl: '',
         categoryName: '',
-        categoryId: '' // ← Zedt hadi!
+        categoryId: ''
     });
 
     const fetchProduct = async () => {
@@ -70,7 +70,7 @@ export default function Page({ params }: { params: Promise<{ productId: string }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        let imageUrl = formData.imageUrl;
+        let imageUrl = formData.imageUrl; // Start with existing image
 
         try {
             // Ila kant file jdida, upload-ha
@@ -83,7 +83,7 @@ export default function Page({ params }: { params: Promise<{ productId: string }
                             headers: {
                                 'Content-Type': 'application/json',
                             },
-                            body: JSON.stringify({ path: formData.imageUrl }),
+                            body: JSON.stringify({ imageUrl: formData.imageUrl }), // ← Changed 'path' to 'imageUrl'
                         });
 
                         const dataDelete = await responseDelete.json();
@@ -109,14 +109,18 @@ export default function Page({ params }: { params: Promise<{ productId: string }
                     throw new Error('Error uploading new image');
                 }
 
-                imageUrl = data.path;
+                // ← HADI HIYA L MUHIMMA: Update imageUrl b path jdida!
+                // L API kat-return 'imageUrl' machi 'path'
+                imageUrl = data.imageUrl;
+
+                console.log('New image uploaded:', imageUrl); // For debugging
             }
 
-            // Update l product (m3a categoryId!)
+            // Update l product (m3a imageUrl jdida!)
             await updateProduct({
                 ...formData,
-                imageUrl,
-                categoryId: formData.categoryId // ← Hadi muhimma!
+                imageUrl: imageUrl, // ← Use updated imageUrl
+                categoryId: formData.categoryId
             }, email);
 
             router.push('/products');
@@ -223,4 +227,3 @@ export default function Page({ params }: { params: Promise<{ productId: string }
         </Wrapper>
     )
 }
-
