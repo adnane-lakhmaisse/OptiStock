@@ -100,7 +100,12 @@ export default function Page() {
                 <tr key={product.id}>
                   <th>{index + 1}</th>
                   <td>
-                    <ProductImage src={product.imageUrl} alt={product.imageUrl} heightClass="h-12" widthClass='w-12' />
+                    <ProductImage
+                      src={product.imageUrl}
+                      alt={product.imageUrl}
+                      heightClass="h-12"
+                      widthClass='w-12'
+                    />
                   </td>
                   <td>{product.name}</td>
                   <td>{product.description}</td>

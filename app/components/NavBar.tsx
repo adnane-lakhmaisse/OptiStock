@@ -9,12 +9,14 @@ import {
   PackagePlus,
   PlusCircle,
   ShoppingBasket,
+  Warehouse,
   X,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useEffect } from "react";
 import { checkAndAddAssociation } from "../actions";
+import Stock from "./Stock";
 
 export default function NavBar() {
   const pathName = usePathname();
@@ -52,6 +54,14 @@ export default function NavBar() {
           </Link>
         );
       })}
+      <button
+        className="btn btn-sm "
+        onClick={() => (document.getElementById('my_modal_stock') as HTMLDialogElement).showModal()}
+      >
+        <Warehouse />
+        to replenish the stock
+      </button>
+
     </>
   );
 
@@ -103,6 +113,7 @@ export default function NavBar() {
         {renderLinks("btn")}
 
       </div>
+      <Stock />
     </div>
   );
 }
