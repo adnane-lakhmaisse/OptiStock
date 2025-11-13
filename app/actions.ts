@@ -174,7 +174,7 @@ export async function createProduct(formData: FormDataType, email: string) {
 
 export async function updateProduct(formData: FormDataType, email: string) {
   const { id, name, description, price, imageUrl, categoryId } = formData;
-  
+
   if (!id || !email) {
     throw new Error("ID and email are required to update a product");
   }
@@ -214,6 +214,7 @@ export async function updateProduct(formData: FormDataType, email: string) {
     throw new Error("Failed to update product");
   }
 }
+
 export async function deleteProduct(id: string, email: string) {
   if (!id || !email) {
     throw new Error("ID and email are required to delete a product");
@@ -235,61 +236,109 @@ export async function deleteProduct(id: string, email: string) {
   }
 }
 
-export async function getAllProducts(email: string) : Promise<Product[] | undefined> {
-    if (!email) {
-        throw new Error("Email is required to get products");
+export async function getAllProducts(
+  email: string
+): Promise<Product[] | undefined> {
+  if (!email) {
+    throw new Error("Email is required to get products");
+  }
+  try {
+    const association = await getAssociation(email);
+    if (!association) {
+      throw new Error("Association not found with this email");
     }
-    try {
-        const association = await getAssociation(email);
-        if (!association) {
-            throw new Error("Association not found with this email");
-        }
-        const products = await prisma.product.findMany({
-            where: {
-                associationId: association.id,
-            },
-            include: {
-                category: true,
-            },
-        });
-        return products.map(product => ({
-            ...product,
-        categoryName: product.category ? product.category.name : "",
-        }))
-
-    } catch (error) {
-        console.error(error);
-        throw new Error("Failed to get products");
-    }
+    const products = await prisma.product.findMany({
+      where: {
+        associationId: association.id,
+      },
+      include: {
+        category: true,
+      },
+    });
+    return products.map((product) => ({
+      ...product,
+      categoryName: product.category ? product.category.name : "",
+    }));
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to get products");
+  }
 }
 
-export async function getProductById(ProductId: string, email: string) : Promise<Product | undefined> {
-    if (!ProductId || !email) {
-        throw new Error("ID and email are required to get a product");
+export async function getProductById(
+  ProductId: string,
+  email: string
+): Promise<Product | undefined> {
+  if (!ProductId || !email) {
+    throw new Error("ID and email are required to get a product");
+  }
+  try {
+    const association = await getAssociation(email);
+    if (!association) {
+      throw new Error("Association not found with this email");
     }
-    try {
-        const association = await getAssociation(email);
-        if (!association) {
-            throw new Error("Association not found with this email");
-        }
-        const product = await prisma.product.findUnique({
-            where: {
-                id: ProductId,
-                associationId: association.id,
-            },
-            include: {
-                category: true,
-            },
-        });
-        if (!product) {
-            throw new Error("Product not found");
-        }
-        return {
-            ...product,
-            categoryName: product.category ? product.category.name : "",
-        };
-    } catch (error) {
-        console.error(error);
-        throw new Error("Failed to get product");
+    const product = await prisma.product.findUnique({
+      where: {
+        id: ProductId,
+        associationId: association.id,
+      },
+      include: {
+        category: true,
+      },
+    });
+    if (!product) {
+      throw new Error("Product not found");
     }
+    return {
+      ...product,
+      categoryName: product.category ? product.category.name : "",
+    };
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to get product");
+  }
+}
+
+export async function replenishStockWithTransaction(
+  productId: string,
+  quantity: number,
+  email: string
+) {
+  if (quantity <= 0) {
+    throw new Error("The quantity to be added must be greater than zero.");
+  }
+  if (!email) {
+    throw new Error("email are required");
+  }
+  try {
+    const association = await getAssociation(email);
+    if (!association) {
+      throw new Error("Association not found with this email");
+    }
+
+    await prisma.product.update({
+      where: {
+        id: productId,
+        associationId: association.id,
+      },
+      data: {
+        quantity: {
+          increment: quantity,
+        },
+      },
+    });
+
+    await prisma.transaction.create({
+      data: {
+        type: "IN",
+        quantity: quantity,
+        productId: productId,
+        associationId: association.id,
+      },
+    });
+
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to add quantity");
+  }
 }
