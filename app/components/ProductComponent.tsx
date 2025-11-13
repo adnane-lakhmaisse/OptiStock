@@ -38,7 +38,7 @@ const ProductComponent : React.FC<ProductComponentProps> = ({ product, add, hand
         </div>
 
         {add && handleAddToCart && (
-          <button onClick={handleAddToCart(product)} className='btn btn-sm btn-circle btn-primary'>
+          <button onClick={()=>handleAddToCart(product)} className='btn btn-sm btn-circle btn-primary'>
             <Plus className='w-4 h-4' />
           </button>
         )}

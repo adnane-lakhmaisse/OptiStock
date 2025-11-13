@@ -1,8 +1,9 @@
 import { Product } from '@/type';
 import { useUser } from '@clerk/nextjs';
 import React, { useEffect, useState } from 'react'
-import { getAllProducts } from '../actions';
+import { getAllProducts, replenishStockWithTransaction } from '../actions';
 import ProductComponent from './ProductComponent';
+import { toast } from 'react-toastify';
 
 export default function Stock() {
     const { user } = useUser();
@@ -37,6 +38,32 @@ export default function Stock() {
         }
     }, [email]);
 
+    const handleSubmit = async (e : React.FormEvent) => {
+        e.preventDefault();
+        if(!selectedProductId || quantity <= 0){
+            return toast.error("Please select a product and enter a valid quantity!")
+        }
+        try {
+            if(email){
+                await replenishStockWithTransaction(selectedProductId,quantity,email);
+            }
+            toast.success("The stock has been successfully replenished!");
+            fetchProducts();
+            setQuantity(0);
+            setSelectedProduct(null);
+            setSelectedProductId('');
+
+            const modal = (document.getElementById("my_modal_stock") as HTMLDialogElement)
+            
+            if (modal) {
+                modal.close();
+            }
+            
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     return (
         <div>
             {/* You can open the modal using document.getElementById('ID').showModal() method */}
@@ -48,7 +75,7 @@ export default function Stock() {
                     </form>
                     <h3 className="font-bold text-lg">Stock Management</h3>
                     <p className="py-4">Add quantities to the products available in your Stock</p>
-                    <form className='space-y-2 '>
+                    <form className='space-y-2' onSubmit={handleSubmit}>
                         <label className='block'> Select product</label>
                         <select
                             value={selectedProductId}
