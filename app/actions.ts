@@ -1,9 +1,8 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { FormDataType, OrderItem, Product } from "@/type";
+import { FormDataType, OrderItem, Product, Transaction } from "@/type";
 import type { Category } from "@prisma/client";
-import { error } from "console";
 
 export async function checkAndAddAssociation(email: string, name: string) {
   if (!email) return;
@@ -409,3 +408,5 @@ export async function deductStockWithTransaction(
     return { success: false, message: error };
   }
 }
+
+
