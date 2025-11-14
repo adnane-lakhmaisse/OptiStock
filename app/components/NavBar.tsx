@@ -3,6 +3,7 @@
 import { UserButton, useUser } from "@clerk/nextjs";
 import {
   AlignHorizontalDistributeEndIcon,
+  HandHeart,
   Home,
   ListTree,
   Menu,
@@ -24,11 +25,12 @@ export default function NavBar() {
   const { user } = useUser();
 
   const navLinks = [
-    { name: "Home", href: "/", icon: Home },
+    // { name: "Home", href: "/", icon: Home },
     { name: "New Product", href: "/new-product", icon: PlusCircle },
     { name: "Products", href: "/products", icon: ShoppingBasket },
     { name: "Categories", href: "/category", icon: ListTree },
-    { name: "About", href: "/about", icon: AlignHorizontalDistributeEndIcon },
+    { name: "Give", href: "/give", icon: HandHeart },
+    // { name: "About", href: "/about", icon: AlignHorizontalDistributeEndIcon },
   ];
 
   useEffect(() => {
