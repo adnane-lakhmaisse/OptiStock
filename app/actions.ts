@@ -1,8 +1,9 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { FormDataType, Product } from "@/type";
+import { FormDataType, OrderItem, Product } from "@/type";
 import type { Category } from "@prisma/client";
+import { error } from "console";
 
 export async function checkAndAddAssociation(email: string, name: string) {
   if (!email) return;
@@ -336,7 +337,74 @@ export async function replenishStockWithTransaction(
         associationId: association.id,
       },
     });
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to add quantity");
+  }
+}
 
+export async function deductStockWithTransaction(
+  orderItem: OrderItem[],
+  email: string
+) {
+  try {
+    if (!email) {
+      throw new Error("email are required");
+    }
+    const association = await getAssociation(email);
+    if (!association) {
+      throw new Error("Association not found with this email");
+    }
+
+    for (const item of orderItem) {
+      const product = await prisma.product.findUnique({
+        where: { id: item.productId },
+      });
+
+      if (!product) {
+        throw new Error(
+          `The product with ID ${item.productId} cannot be found.`
+        );
+      }
+      if (item.quantity <= 0) {
+        throw new Error(
+          `The requested quantity for product ${item.name} must be greater than zero.`
+        );
+      }
+      if (item.quantity > product.quantity) {
+        throw new Error(
+          `The product "a" does not have enough stock. Requested: ${item.quantity}, available: ${product.quantity} / ${product.unit}.`
+        );
+      }
+    }
+
+    await prisma.$transaction(async (tx) => {
+      for (const item of orderItem) {
+        await tx.product.update({
+          where: {
+            id: item.productId,
+            associationId: association.id,
+          },
+          data: {
+            quantity: {
+              decrement: item.quantity,
+            },
+          },
+        });
+
+        await prisma.transaction.create({
+          data: {
+            type: "OUT",
+            quantity: item.quantity,
+            productId: item.productId,
+            associationId: association.id,
+          },
+        });
+      }
+    });
+
+    return { success: true };
+    
   } catch (error) {
     console.error(error);
     throw new Error("Failed to add quantity");
