@@ -409,4 +409,44 @@ export async function deductStockWithTransaction(
   }
 }
 
+export async function getTransactions(
+  email: string,
+  limit?: number
+): Promise<Transaction[]> {
+  if (!email) {
+    throw new Error("Email is required.");
+  }
 
+  try {
+    const association = await getAssociation(email);
+
+    if (!association) {
+      throw new Error("Association not found with this email");
+    }
+
+    const transactions = await prisma.transaction.findMany({
+      where: { associationId: association.id },
+      take: limit || undefined,
+      orderBy: { createdAt: "desc" },
+      include: {
+        product: {
+          include: {
+            category: true,
+          },
+        },
+      },
+    });
+
+    return transactions.map((transaction) => ({
+      ...transaction,
+      categoryName: transaction.product.category.name,
+      productName: transaction.product.name,
+      imageUrl: transaction.product.imageUrl,
+      price: transaction.product.price,
+      unit: transaction.product.unit,
+    }));
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}

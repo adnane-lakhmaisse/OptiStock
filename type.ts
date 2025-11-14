@@ -26,9 +26,9 @@ export interface OrderItem {
 }
 
 export interface Transaction extends PrismaTransaction {
-  categoryName : string ;
-  productName : string ;
-  imageUrl?: string ;
-  price : string ;
-  unit : string
+  categoryName: string | null;
+  productName: string | null;
+  imageUrl?: string | null;
+  price: number;   
+  unit: string | null;
 }
