@@ -373,7 +373,7 @@ export async function deductStockWithTransaction(
       }
       if (item.quantity > product.quantity) {
         throw new Error(
-          `The product "a" does not have enough stock. Requested: ${item.quantity}, available: ${product.quantity} / ${product.unit}.`
+          `The product ${product.name} does not have enough stock. Requested: ${item.quantity} ${product.unit}, available: ${product.quantity} ${product.unit}.`
         );
       }
     }
@@ -392,7 +392,7 @@ export async function deductStockWithTransaction(
           },
         });
 
-        await prisma.transaction.create({
+        await tx.transaction.create({
           data: {
             type: "OUT",
             quantity: item.quantity,
@@ -404,9 +404,8 @@ export async function deductStockWithTransaction(
     });
 
     return { success: true };
-    
   } catch (error) {
     console.error(error);
-    throw new Error("Failed to add quantity");
+    return { success: false, message: error };
   }
 }

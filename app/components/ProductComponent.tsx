@@ -30,16 +30,16 @@ const ProductComponent : React.FC<ProductComponentProps> = ({ product, add, hand
       </div>
       <div className='ml-4 space-y-2 flex flex-col'>
         <h2 className='text-lg font-bold'>{product.name}</h2>
-        <div className='badge badge-warning badge-soft'>
+        <div className='badge badge-primary badge-soft'>
           {product.categoryName}
         </div>
-        <div className='badge badge-warning badge-soft'>
+        <div className='badge badge-primary badge-soft'>
           {product.quantity} {product.unit}
         </div>
 
         {add && handleAddToCart && (
           <button onClick={()=>handleAddToCart(product)} className='btn btn-sm btn-circle btn-primary'>
-            <Plus className='w-4 h-4' />
+            <Plus className='w-4 h-4 text-white' />
           </button>
         )}
       </div>
