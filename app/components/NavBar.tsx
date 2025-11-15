@@ -9,6 +9,7 @@ import {
   Menu,
   PackagePlus,
   PlusCircle,
+  Receipt,
   ShoppingBasket,
   Warehouse,
   X,
@@ -30,6 +31,7 @@ export default function NavBar() {
     { name: "Products", href: "/products", icon: ShoppingBasket },
     { name: "Categories", href: "/category", icon: ListTree },
     { name: "Give", href: "/give", icon: HandHeart },
+    { name: "Transactions", href: "/transactions", icon: Receipt },
     // { name: "About", href: "/about", icon: AlignHorizontalDistributeEndIcon },
   ];
 
