@@ -480,7 +480,8 @@ export async function getProductOverviewStats(
     const totalCategories = categories?.length ?? 0;
     const totalProducts = products?.length ?? 0;
     const totalTransactions = transactions.length ?? 0;
-    const stockValue = products?.reduce((acc, product) => {
+    const stockValue =
+      products?.reduce((acc, product) => {
         return acc + Number(product.price ?? 0) * Number(product.quantity ?? 0);
       }, 0) ?? 0;
 
@@ -498,5 +499,43 @@ export async function getProductOverviewStats(
       totalTransactions: 0,
       stockValue: 0,
     };
+  }
+}
+
+export async function getProductCategoryDistribution(email: string) {
+  try {
+    if (!email) {
+      throw new Error("Email is required.");
+    }
+    const association = await getAssociation(email);
+
+    if (!association) {
+      throw new Error("Association not found with this email");
+    }
+    const R = 5;
+
+    const categoriesWithProductCount = await prisma.category.findMany({
+      where: {
+        associationId: association.id,
+      },
+      include: {
+        products: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    const data = categoriesWithProductCount
+      .map((category) => ({
+        name: category.name,
+        value: category.products.length,
+      }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, R);
+      
+  } catch (error) {
+    console.error(error);
   }
 }
