@@ -1,7 +1,13 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { FormDataType, OrderItem, Product, Transaction } from "@/type";
+import {
+  FormDataType,
+  OrderItem,
+  Product,
+  ProductOverviewStats,
+  Transaction,
+} from "@/type";
 import type { Category } from "@prisma/client";
 
 export async function checkAndAddAssociation(email: string, name: string) {
@@ -448,5 +454,49 @@ export async function getTransactions(
   } catch (error) {
     console.error(error);
     return [];
+  }
+}
+
+export async function getProductOverviewStats(
+  email: string
+): Promise<ProductOverviewStats> {
+  try {
+    if (!email) {
+      throw new Error("Email is required.");
+    }
+    const association = await getAssociation(email);
+
+    if (!association) {
+      throw new Error("Association not found with this email");
+    }
+
+    const products = await getAllProducts(email);
+    const transactions = await getTransactions(email);
+    const categories = await getAllCategories(email);
+    // const setCategories = new Set(
+    //   products?.map((product) => product.categoryName)
+    // );
+
+    const totalCategories = categories?.length ?? 0;
+    const totalProducts = products?.length ?? 0;
+    const totalTransactions = transactions.length ?? 0;
+    const stockValue = products?.reduce((acc, product) => {
+        return acc + Number(product.price ?? 0) * Number(product.quantity ?? 0);
+      }, 0) ?? 0;
+
+    return {
+      totalProducts,
+      totalCategories,
+      totalTransactions,
+      stockValue,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      totalProducts: 0,
+      totalCategories: 0,
+      totalTransactions: 0,
+      stockValue: 0,
+    };
   }
 }

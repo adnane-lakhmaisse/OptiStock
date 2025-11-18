@@ -1,10 +1,19 @@
 "use client";
 
+import { useUser } from "@clerk/nextjs";
 import Wrapper from "./components/Wrapper";
+import ProductOverview from "./components/ProductOverview";
 
 export default function Home() {
+
+  const { user } = useUser()
+  const email = user?.primaryEmailAddress?.emailAddress || "";
   return <Wrapper>
-    <h1>Welcome to OptiStock</h1> 
+    <div className="flex flex-col md:flex-row ">
+      <div className="md:w-2/3" >
+      <ProductOverview email={email} />
+      </div>
+    </div>
   </Wrapper>;
 
 }

@@ -5,6 +5,7 @@ import {
   AlignHorizontalDistributeEndIcon,
   HandHeart,
   Home,
+  LayoutDashboard,
   ListTree,
   Menu,
   PackagePlus,
@@ -26,7 +27,7 @@ export default function NavBar() {
   const { user } = useUser();
 
   const navLinks = [
-    // { name: "Home", href: "/", icon: Home },
+    { name: "Dashboard", href: "/", icon: LayoutDashboard },
     { name: "New Product", href: "/new-product", icon: PlusCircle },
     { name: "Products", href: "/products", icon: ShoppingBasket },
     { name: "Categories", href: "/category", icon: ListTree },
